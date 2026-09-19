@@ -1,0 +1,62 @@
+:root {
+  --bg: #ffffff;
+  --blush: #fff6f5;
+  --rose: #f4b4b8;
+  --rose-deep: #a5504f;
+  --wine: #7d3a3d;
+  --leaf: #7f9a6b;
+  --ink: #3a2a2b;
+  --muted: #8a7778;
+  --line: #f1e1e0;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Jost', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+::selection {
+  background: var(--rose);
+  color: #fff;
+}
