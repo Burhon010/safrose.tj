@@ -40,7 +40,7 @@ const ICONS = {
   ),
 }
 
-function useReveal(dep) {
+function useReveal(content, activeCat) {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal:not(.in)')
     if (!('IntersectionObserver' in window)) {
@@ -59,7 +59,9 @@ function useReveal(dep) {
     )
     els.forEach((e) => io.observe(e))
     return () => io.disconnect()
-  }, [dep])
+    // re-scan whenever the catalog's filtered set of cards changes, so newly
+    // mounted cards (a different category, or fresh admin content) get observed too
+  }, [content, activeCat])
 }
 
 function initialLang() {
@@ -72,10 +74,14 @@ function initialLang() {
   return 'ru'
 }
 
-function ProductCard({ p, i, t, hl }) {
+function ProductCard({ p, i, t, hidden }) {
   const [open, setOpen] = useState(false)
   return (
-    <article id={`p-${p.key}`} className={`card card--${p.tone} reveal`} data-hl={hl === p.key ? '1' : undefined} style={{ '--d': `${(i % 3) * 0.1}s` }}>
+    <article
+      id={`p-${p.key}`}
+      className={`card card--${p.tone} reveal`}
+      style={{ '--d': `${(i % 3) * 0.1}s`, display: hidden ? 'none' : undefined }}
+    >
       <div className="card__img">
         {p.img ? (
           <img src={p.img} alt={`${p.name} — ${p.en} 250 ml`} loading="lazy" />
@@ -143,11 +149,11 @@ export default function App() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [lang, setLang] = useState(initialLang)
-  const [hl, setHl] = useState(null)
   const [admin, setAdmin] = useState(null)
+  const [activeCat, setActiveCat] = useState('all')
   const [content, setContent] = useState(() => readCache() || DEFAULT_CONTENT)
   const t = T[lang]
-  useReveal(content)
+  useReveal(content, activeCat)
 
   useEffect(() => {
     let alive = true
@@ -197,6 +203,7 @@ export default function App() {
             img: p.img,
             tone: p.tone || 'new',
             en: p.en,
+            categoryId: p.categoryId || '',
             name: me.name || other.name,
             alt: other.name,
             text: me.text || other.text,
@@ -205,6 +212,18 @@ export default function App() {
         }),
     [content, lang],
   )
+
+  const categories = useMemo(() => {
+    const list = content.categories || []
+    return list
+      .filter((cat) => products.some((p) => p.categoryId === cat.id))
+      .map((cat) => ({ id: cat.id, name: (lang === 'ru' ? cat.ru : cat.tj) || cat.ru || cat.tj || '' }))
+      .filter((cat) => cat.name)
+  }, [content.categories, products, lang])
+
+  useEffect(() => {
+    if (activeCat !== 'all' && !categories.some((c) => c.id === activeCat)) setActiveCat('all')
+  }, [categories, activeCat])
 
   const contacts = content.contacts || {}
   const phone = contacts.phone || ''
@@ -229,15 +248,6 @@ export default function App() {
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
   }, [])
-
-  const pick = (key) => {
-    const el = document.getElementById(`p-${key}`)
-    if (!el) return
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    setHl(null)
-    setTimeout(() => setHl(key), 350)
-    setTimeout(() => setHl(null), 2600)
-  }
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -306,17 +316,6 @@ export default function App() {
               <p className="lead reveal" style={{ '--d': '.16s' }}>
                 {t.lead}
               </p>
-              <ul className="chips reveal" style={{ '--d': '.24s' }}>
-                {t.chips
-                  .filter(([, key]) => products.some((p) => p.key === key))
-                  .map(([label, key]) => (
-                    <li key={key}>
-                      <button type="button" onClick={() => pick(key)}>
-                        {label}
-                      </button>
-                    </li>
-                  ))}
-              </ul>
               <div className="hero__btns reveal" style={{ '--d': '.32s' }}>
                 <a className="btn" href="#catalog">
                   {t.btnCatalog}
@@ -362,9 +361,32 @@ export default function App() {
                 <em>{t.catalogTitle[1]}</em>
               </h2>
             </div>
+            {categories.length > 0 && (
+              <div className="cats reveal">
+                <button type="button" className={activeCat === 'all' ? 'on' : ''} onClick={() => setActiveCat('all')}>
+                  {t.catAll}
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={activeCat === cat.id ? 'on' : ''}
+                    onClick={() => setActiveCat(cat.id)}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="grid">
               {products.map((p, i) => (
-                <ProductCard key={p.key} p={p} i={i} t={t} hl={hl} />
+                <ProductCard
+                  key={p.key}
+                  p={p}
+                  i={i}
+                  t={t}
+                  hidden={activeCat !== 'all' && p.categoryId !== activeCat}
+                />
               ))}
             </div>
           </div>

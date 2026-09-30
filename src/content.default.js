@@ -1,4 +1,11 @@
 export const DEFAULT_CONTENT = {
+  "categories": [
+    { "id": "cat-rose", "ru": "Роза", "tj": "Садбарг" },
+    { "id": "cat-chicory", "ru": "Цикорий", "tj": "Косни" },
+    { "id": "cat-camelthorn", "ru": "Верблюжья колючка", "tj": "Қонунур (Янток)" },
+    { "id": "cat-mint", "ru": "Мята", "tj": "Пудина" },
+    { "id": "cat-grape", "ru": "Виноград", "tj": "Ангур" }
+  ],
   "contacts": {
     "phone": "000-00-73-74",
     "instagram": "https://www.instagram.com/safrose.tj/",
@@ -10,6 +17,7 @@ export const DEFAULT_CONTENT = {
   "products": [
     {
       "id": "rose",
+      "categoryId": "cat-rose",
       "hidden": false,
       "img": "/images/rose.jpg",
       "tone": "rose",
@@ -51,6 +59,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "chicory",
+      "categoryId": "cat-chicory",
       "hidden": false,
       "img": "/images/chicory.jpg",
       "tone": "lilac",
@@ -92,6 +101,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "camelthorn",
+      "categoryId": "cat-camelthorn",
       "hidden": false,
       "img": "/images/camelthorn.jpg",
       "tone": "ruby",
@@ -133,6 +143,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "mint",
+      "categoryId": "cat-mint",
       "hidden": false,
       "img": "/images/mint.jpg",
       "tone": "mint",
@@ -172,6 +183,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "grape",
+      "categoryId": "cat-grape",
       "hidden": false,
       "img": "/images/grape.jpg",
       "tone": "grape",

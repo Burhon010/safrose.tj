@@ -75,6 +75,7 @@ export function LoginModal({ onClose, onSuccess }) {
 const NO_DB = 'На сервере не подключена база данных, изменения сохранить нельзя. Обратитесь к разработчику.'
 const lines = (s) => s.split('\n')
 const EMPTY_PART = () => ({ name: '', text: '', info: { tags: [], head: '', body: '', contra: '', usage: '' } })
+const catLabel = (cat) => cat.ru || cat.tj || 'Без названия'
 
 function compress(file) {
   return new Promise((resolve, reject) => {
@@ -140,7 +141,7 @@ function LangFields({ title, part, onChange }) {
   )
 }
 
-function ProductEditor({ product, onChange, onDone, onAuthLost }) {
+function ProductEditor({ product, categories, onChange, onDone, onAuthLost }) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
   const fileRef = useRef(null)
@@ -185,6 +186,16 @@ function ProductEditor({ product, onChange, onDone, onAuthLost }) {
       <Field label="Название на английском (для подписи под фото)">
         <input value={product.en} onChange={(e) => set({ en: e.target.value })} />
       </Field>
+      <Field label="Категория" hint="Показывается как фильтр рядом с каталогом на сайте">
+        <select value={product.categoryId || ''} onChange={(e) => set({ categoryId: e.target.value })}>
+          <option value="">Без категории</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {catLabel(cat)}
+            </option>
+          ))}
+        </select>
+      </Field>
       <label className="check">
         <input type="checkbox" checked={!product.hidden} onChange={(e) => set({ hidden: !e.target.checked })} />
         Показывать на сайте
@@ -197,9 +208,54 @@ function ProductEditor({ product, onChange, onDone, onAuthLost }) {
   )
 }
 
+function CategoryManager({ draft, setDraft }) {
+  const cats = draft.categories || []
+  const setCats = (categories) => setDraft({ ...draft, categories })
+  const upd = (i, patch) => setCats(cats.map((c, n) => (n === i ? { ...c, ...patch } : c)))
+  const add = () => setCats([...cats, { id: 'c' + Date.now().toString(36), ru: '', tj: '' }])
+  const remove = (i) => {
+    const cat = cats[i]
+    if (!window.confirm(`Удалить категорию «${catLabel(cat)}»?`)) return
+    setDraft({
+      ...draft,
+      categories: cats.filter((_, n) => n !== i),
+      products: draft.products.map((p) => (p.categoryId === cat.id ? { ...p, categoryId: '' } : p)),
+    })
+  }
+
+  return (
+    <div className="cat-section">
+      <h3>Категории</h3>
+      <p className="muted">
+        Категории показываются как фильтр рядом с каталогом на сайте. Название задаётся на русском и таджикском, категория
+        для продукта выбирается при его редактировании.
+      </p>
+      {cats.length > 0 && (
+        <ul className="plist">
+          {cats.map((c, i) => (
+            <li key={c.id}>
+              <input className="cat-in" placeholder="Название (RU)" value={c.ru} onChange={(e) => upd(i, { ru: e.target.value })} />
+              <input className="cat-in" placeholder="Название (TJ)" value={c.tj} onChange={(e) => upd(i, { tj: e.target.value })} />
+              <div className="plist__btns">
+                <button type="button" className="danger" onClick={() => remove(i)}>
+                  Удалить
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <button type="button" className="ghost add" onClick={add}>
+        + Добавить категорию
+      </button>
+    </div>
+  )
+}
+
 function Products({ draft, setDraft, onAuthLost }) {
   const [editing, setEditing] = useState(null)
   const list = draft.products
+  const categories = draft.categories || []
   const update = (products) => setDraft({ ...draft, products })
   const move = (i, d) => {
     const j = i + d
@@ -210,7 +266,7 @@ function Products({ draft, setDraft, onAuthLost }) {
   }
   const add = () => {
     const id = 'p' + Date.now().toString(36)
-    update([...list, { id, hidden: false, img: '', tone: 'new', en: '', ru: EMPTY_PART(), tj: EMPTY_PART() }])
+    update([...list, { id, hidden: false, img: '', tone: 'new', en: '', categoryId: '', ru: EMPTY_PART(), tj: EMPTY_PART() }])
     setEditing(id)
   }
   const remove = (p) => {
@@ -222,6 +278,7 @@ function Products({ draft, setDraft, onAuthLost }) {
     return (
       <ProductEditor
         product={cur}
+        categories={categories}
         onChange={(np) => update(list.map((x) => (x.id === np.id ? np : x)))}
         onDone={() => setEditing(null)}
         onAuthLost={onAuthLost}
@@ -231,13 +288,21 @@ function Products({ draft, setDraft, onAuthLost }) {
 
   return (
     <div>
-      <ul className="plist">
+      <CategoryManager draft={draft} setDraft={setDraft} />
+      <ul className="plist plist--products">
         {list.map((p, i) => (
           <li key={p.id} className={p.hidden ? 'is-hidden' : ''}>
             <div className="thumb">{p.img ? <img src={p.img} alt="" /> : <span>—</span>}</div>
             <div className="plist__name">
               <b>{p.ru.name || p.tj.name || 'Без названия'}</b>
-              <small>{p.hidden ? 'Скрыт на сайте' : 'Виден на сайте'}</small>
+              <small>
+                {p.hidden ? 'Скрыт на сайте' : 'Виден на сайте'}
+                {' · '}
+                {(() => {
+                  const cat = categories.find((c) => c.id === p.categoryId)
+                  return cat ? catLabel(cat) : 'Без категории'
+                })()}
+              </small>
             </div>
             <div className="plist__btns">
               <button type="button" className="arrow" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Выше">

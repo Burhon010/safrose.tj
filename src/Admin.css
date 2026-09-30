@@ -80,7 +80,8 @@
 
 .modal input,
 .admin input:not([type='checkbox']):not([type='file']),
-.admin textarea {
+.admin textarea,
+.admin select {
   font: inherit;
   font-size: 16px;
   color: var(--ink);
@@ -96,9 +97,13 @@
   resize: vertical;
   line-height: 1.5;
 }
+.admin select {
+  width: 100%;
+}
 .modal input:focus,
 .admin input:focus,
-.admin textarea:focus {
+.admin textarea:focus,
+.admin select:focus {
   border-color: var(--rose);
   box-shadow: 0 0 0 4px rgba(244, 180, 184, 0.3);
 }
@@ -267,6 +272,22 @@
 }
 .add {
   margin-top: 16px;
+}
+.cat-section {
+  margin-bottom: 26px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.cat-section h3 {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+.cat-section .muted {
+  margin-bottom: 16px;
+}
+.cat-in {
+  flex: 1 1 160px;
+  min-width: 0;
 }
 .thumb {
   width: 60px;

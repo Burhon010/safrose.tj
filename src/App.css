@@ -278,31 +278,6 @@ em {
   color: var(--muted);
   margin: 22px 0 26px;
 }
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 38px;
-}
-.chips li {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  color: var(--rose-deep);
-  overflow: hidden;
-  transition: background 0.3s, border-color 0.3s;
-}
-.chips li:hover {
-  background: var(--blush);
-  border-color: var(--rose);
-}
-.chips button {
-  padding: 7px 20px;
-  color: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
 .hero__btns {
   display: flex;
   flex-wrap: wrap;
@@ -536,6 +511,31 @@ em {
 }
 
 /* catalog */
+.cats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: clamp(30px, 5vw, 50px);
+}
+.cats button {
+  padding: 9px 22px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--rose-deep);
+  font-size: 0.9rem;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.cats button:hover {
+  border-color: var(--rose);
+  background: var(--blush);
+}
+.cats button.on {
+  background: linear-gradient(135deg, #c96b70, var(--rose-deep));
+  border-color: transparent;
+  color: #fff;
+}
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -682,6 +682,7 @@ em {
   padding-top: 16px;
 }
 .info__tags li {
+  max-width: 100%;
   padding: 4px 12px;
   border-radius: 999px;
   background: var(--blush);
@@ -689,6 +690,8 @@ em {
   color: var(--rose-deep);
   font-size: 0.82rem;
   line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .info h4 {
   font-family: var(--serif);
@@ -979,7 +982,6 @@ em {
   .hero .eyebrow {
     justify-content: center;
   }
-  .chips,
   .hero__btns {
     justify-content: center;
   }
@@ -1006,8 +1008,65 @@ em {
 }
 
 @media (max-width: 560px) {
+  .grid {
+    gap: 12px;
+  }
   .grid .card {
-    flex-basis: 100%;
+    flex-basis: calc((100% - 12px) / 2);
+    border-radius: 18px;
+  }
+  .card__body {
+    padding: 14px 14px 18px;
+  }
+  .card__body h3 {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+  .card__tj {
+    font-size: 0.9rem;
+    margin: 3px 0 6px;
+  }
+  .card__text,
+  .card__en {
+    font-size: 0.8rem;
+  }
+  .badge {
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    font-size: 0.66rem;
+  }
+  .info__btn {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+  .info__btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .info__tags {
+    padding-top: 10px;
+    gap: 5px;
+  }
+  .info__tags li {
+    padding: 3px 9px;
+    font-size: 0.72rem;
+  }
+  .info h4 {
+    font-size: 1rem;
+    margin: 10px 0 5px;
+  }
+  .info__in {
+    font-size: 0.8rem;
+  }
+  .link {
+    padding-top: 12px;
+    font-size: 0.82rem;
+  }
+  .cats button {
+    padding: 7px 16px;
+    font-size: 0.82rem;
   }
   .nav .btn {
     width: auto;
