@@ -23,6 +23,8 @@ export function CartDrawer({ items, total, currency, t, onQty, onRemove, onClear
   const [step, setStep] = useState('cart')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [entrance, setEntrance] = useState('')
   const [comment, setComment] = useState('')
   const [err, setErr] = useState('')
 
@@ -34,7 +36,7 @@ export function CartDrawer({ items, total, currency, t, onQty, onRemove, onClear
 
   const submit = async (e) => {
     e.preventDefault()
-    if (!name.trim() || !phone.trim()) {
+    if (!name.trim() || !phone.trim() || !address.trim()) {
       setErr(t.cartNeedFields)
       return
     }
@@ -45,6 +47,8 @@ export function CartDrawer({ items, total, currency, t, onQty, onRemove, onClear
         items: items.map((i) => ({ id: i.key, qty: i.qty })),
         name: name.trim(),
         phone: phone.trim(),
+        address: address.trim(),
+        entrance: entrance.trim(),
         comment: comment.trim(),
       })
       setStep('done')
@@ -109,6 +113,8 @@ export function CartDrawer({ items, total, currency, t, onQty, onRemove, onClear
             <form className="cart-form" onSubmit={submit}>
               <input placeholder={t.cartName} value={name} onChange={(e) => setName(e.target.value)} />
               <input placeholder={t.cartPhone} value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <input placeholder={t.cartAddress} value={address} onChange={(e) => setAddress(e.target.value)} />
+              <input placeholder={t.cartEntrance} value={entrance} onChange={(e) => setEntrance(e.target.value)} />
               <textarea
                 placeholder={t.cartComment}
                 rows="2"

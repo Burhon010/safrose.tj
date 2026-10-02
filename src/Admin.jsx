@@ -464,6 +464,12 @@ function Orders({ onAuthLost }) {
                 <span>{o.name}</span>
                 <a href={`tel:${o.phone.replace(/[^\d+]/g, '')}`}>{o.phone}</a>
               </div>
+              {o.address && (
+                <p className="order__comment">
+                  {o.address}
+                  {o.entrance ? `, подъезд ${o.entrance}` : ''}
+                </p>
+              )}
               {o.comment && <p className="order__comment">{o.comment}</p>}
               <ul className="order__items">
                 {o.items.map((it, n) => (

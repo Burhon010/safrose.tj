@@ -1,10 +1,7 @@
 export const DEFAULT_CONTENT = {
   "categories": [
-    { "id": "cat-rose", "ru": "Роза", "tj": "Садбарг" },
-    { "id": "cat-chicory", "ru": "Цикорий", "tj": "Косни" },
-    { "id": "cat-camelthorn", "ru": "Верблюжья колючка", "tj": "Қонунур (Янток)" },
-    { "id": "cat-mint", "ru": "Мята", "tj": "Пудина" },
-    { "id": "cat-grape", "ru": "Виноград", "tj": "Ангур" }
+    { "id": "cat-drinks", "ru": "Напитки", "tj": "Нӯшокиҳо" },
+    { "id": "cat-olive", "ru": "Оливковое масло", "tj": "Равғани зайтун" }
   ],
   "contacts": {
     "phone": "000-00-73-74",
@@ -17,7 +14,7 @@ export const DEFAULT_CONTENT = {
   "products": [
     {
       "id": "rose",
-      "categoryId": "cat-rose",
+      "categoryId": "cat-drinks",
       "price": 100,
       "hidden": false,
       "img": "/images/rose.jpg",
@@ -60,7 +57,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "chicory",
-      "categoryId": "cat-chicory",
+      "categoryId": "cat-drinks",
       "price": 100,
       "hidden": false,
       "img": "/images/chicory.jpg",
@@ -103,7 +100,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "camelthorn",
-      "categoryId": "cat-camelthorn",
+      "categoryId": "cat-drinks",
       "price": 100,
       "hidden": false,
       "img": "/images/camelthorn.jpg",
@@ -146,7 +143,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "mint",
-      "categoryId": "cat-mint",
+      "categoryId": "cat-drinks",
       "price": 100,
       "hidden": false,
       "img": "/images/mint.jpg",
@@ -187,7 +184,7 @@ export const DEFAULT_CONTENT = {
     },
     {
       "id": "grape",
-      "categoryId": "cat-grape",
+      "categoryId": "cat-drinks",
       "price": 100,
       "hidden": false,
       "img": "/images/grape.jpg",
