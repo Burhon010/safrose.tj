@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { changePassword, getToken, login, saveContent, setToken, uploadImage } from './api.js'
+import {
+  changePassword,
+  clearOrders,
+  deleteOrder,
+  fetchOrders,
+  getToken,
+  login,
+  saveContent,
+  setToken,
+  uploadImage,
+} from './api.js'
 import './Admin.css'
 
 export function PasswordInput({ value, onChange, placeholder, autoFocus, autoComplete }) {
@@ -186,6 +196,15 @@ function ProductEditor({ product, categories, onChange, onDone, onAuthLost }) {
       <Field label="Название на английском (для подписи под фото)">
         <input value={product.en} onChange={(e) => set({ en: e.target.value })} />
       </Field>
+      <Field label="Цена, сомони" hint="0 — цена не показывается, вместо кнопки «В корзину» будет кнопка «Заказать»">
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={product.price ?? ''}
+          onChange={(e) => set({ price: e.target.value })}
+        />
+      </Field>
       <Field label="Категория" hint="Показывается как фильтр рядом с каталогом на сайте">
         <select value={product.categoryId || ''} onChange={(e) => set({ categoryId: e.target.value })}>
           <option value="">Без категории</option>
@@ -266,7 +285,7 @@ function Products({ draft, setDraft, onAuthLost }) {
   }
   const add = () => {
     const id = 'p' + Date.now().toString(36)
-    update([...list, { id, hidden: false, img: '', tone: 'new', en: '', categoryId: '', ru: EMPTY_PART(), tj: EMPTY_PART() }])
+    update([...list, { id, hidden: false, img: '', tone: 'new', en: '', categoryId: '', price: 0, ru: EMPTY_PART(), tj: EMPTY_PART() }])
     setEditing(id)
   }
   const remove = (p) => {
@@ -302,6 +321,8 @@ function Products({ draft, setDraft, onAuthLost }) {
                   const cat = categories.find((c) => c.id === p.categoryId)
                   return cat ? catLabel(cat) : 'Без категории'
                 })()}
+                {' · '}
+                {p.price > 0 ? `${p.price} сомони` : 'без цены'}
               </small>
             </div>
             <div className="plist__btns">
@@ -352,6 +373,110 @@ function Contacts({ draft, setDraft }) {
       <Field label="Адрес (таджикский)">
         <input value={c.address.tj} onChange={(e) => set({ address: { ...c.address, tj: e.target.value } })} />
       </Field>
+    </div>
+  )
+}
+
+const fmtTime = (ms) => new Date(ms).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+
+function Orders({ onAuthLost }) {
+  const [orders, setOrders] = useState(null)
+  const [tgOn, setTgOn] = useState(false)
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const load = async () => {
+    setErr('')
+    try {
+      const { orders: list, telegramConfigured } = await fetchOrders()
+      setOrders(list)
+      setTgOn(telegramConfigured)
+    } catch (ex) {
+      if (ex.status === 401) onAuthLost()
+      else setErr('Не удалось загрузить заказы')
+    }
+  }
+
+  useEffect(() => {
+    load()
+  }, [])
+
+  const remove = async (id) => {
+    if (!window.confirm('Удалить этот заказ?')) return
+    setBusy(true)
+    try {
+      await deleteOrder(id)
+      setOrders((list) => list.filter((o) => o.id !== id))
+    } catch (ex) {
+      if (ex.status === 401) onAuthLost()
+      else setErr('Не удалось удалить заказ')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const clear = async () => {
+    if (!window.confirm('Удалить все заказы без возможности восстановить?')) return
+    setBusy(true)
+    try {
+      await clearOrders()
+      setOrders([])
+    } catch (ex) {
+      if (ex.status === 401) onAuthLost()
+      else setErr('Не удалось очистить список')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div>
+      {!tgOn && orders !== null && (
+        <p className="muted orders__hint">
+          Уведомления в Telegram ещё не подключены — все заказы видны только здесь. Подключим, когда будут готовы токен бота
+          и ID чата.
+        </p>
+      )}
+      <div className="orders__top">
+        <button type="button" className="ghost" onClick={load} disabled={busy}>
+          Обновить
+        </button>
+        <button type="button" className="ghost" onClick={clear} disabled={busy || !orders?.length}>
+          Очистить всё
+        </button>
+      </div>
+      {err && <p className="err">{err}</p>}
+      {orders === null ? (
+        <p className="muted">Загрузка…</p>
+      ) : orders.length === 0 ? (
+        <p className="muted">Заказов пока нет.</p>
+      ) : (
+        <ul className="orders">
+          {orders.map((o) => (
+            <li key={o.id} className="order">
+              <div className="order__top">
+                <b>{fmtTime(o.time)}</b>
+                <button type="button" className="danger" onClick={() => remove(o.id)} disabled={busy}>
+                  Удалить
+                </button>
+              </div>
+              <div className="order__contact">
+                <span>{o.name}</span>
+                <a href={`tel:${o.phone.replace(/[^\d+]/g, '')}`}>{o.phone}</a>
+              </div>
+              {o.comment && <p className="order__comment">{o.comment}</p>}
+              <ul className="order__items">
+                {o.items.map((it, n) => (
+                  <li key={n}>
+                    {it.name} × {it.qty} — {it.lineTotal} сомони
+                  </li>
+                ))}
+              </ul>
+              <div className="order__total">Итого: {o.total} сомони</div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -472,6 +597,7 @@ export function AdminPanel({ content, onSaved, onClose, onAuthLost }) {
       <nav className="admin__tabs">
         {[
           ['products', 'Продукты'],
+          ['orders', 'Заказы'],
           ['contacts', 'Контакты'],
           ['password', 'Пароль'],
         ].map(([k, l]) => (
@@ -482,10 +608,11 @@ export function AdminPanel({ content, onSaved, onClose, onAuthLost }) {
       </nav>
       <main className="admin__body">
         {tab === 'products' && <Products draft={draft} setDraft={setDraft} onAuthLost={onAuthLost} />}
+        {tab === 'orders' && <Orders onAuthLost={onAuthLost} />}
         {tab === 'contacts' && <Contacts draft={draft} setDraft={setDraft} />}
         {tab === 'password' && <Password onAuthLost={onAuthLost} />}
       </main>
-      {tab !== 'password' && (
+      {tab !== 'password' && tab !== 'orders' && (
         <footer className="admin__save">
           <span className={status?.bad ? 'err' : dirty ? 'warn' : 'ok'}>
             {status ? status.t : dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}

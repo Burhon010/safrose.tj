@@ -18,6 +18,7 @@ export const DEFAULT_CONTENT = {
     {
       "id": "rose",
       "categoryId": "cat-rose",
+      "price": 100,
       "hidden": false,
       "img": "/images/rose.jpg",
       "tone": "rose",
@@ -60,6 +61,7 @@ export const DEFAULT_CONTENT = {
     {
       "id": "chicory",
       "categoryId": "cat-chicory",
+      "price": 100,
       "hidden": false,
       "img": "/images/chicory.jpg",
       "tone": "lilac",
@@ -102,6 +104,7 @@ export const DEFAULT_CONTENT = {
     {
       "id": "camelthorn",
       "categoryId": "cat-camelthorn",
+      "price": 100,
       "hidden": false,
       "img": "/images/camelthorn.jpg",
       "tone": "ruby",
@@ -144,6 +147,7 @@ export const DEFAULT_CONTENT = {
     {
       "id": "mint",
       "categoryId": "cat-mint",
+      "price": 100,
       "hidden": false,
       "img": "/images/mint.jpg",
       "tone": "mint",
@@ -184,6 +188,7 @@ export const DEFAULT_CONTENT = {
     {
       "id": "grape",
       "categoryId": "cat-grape",
+      "price": 100,
       "hidden": false,
       "img": "/images/grape.jpg",
       "tone": "grape",

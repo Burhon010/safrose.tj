@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Petals from './Petals.jsx'
 import HeroSlider from './HeroSlider.jsx'
 import { AdminPanel, LoginModal, hasToken } from './Admin.jsx'
-import { fetchContent, readCache, setToken, writeCache } from './api.js'
+import { CartButton, CartDrawer } from './Cart.jsx'
+import { fetchContent, readCache, readCartCache, setToken, writeCache, writeCartCache } from './api.js'
 import { DEFAULT_CONTENT } from './content.default.js'
 import { T } from './i18n.js'
 import './App.css'
@@ -74,7 +75,7 @@ function initialLang() {
   return 'ru'
 }
 
-function ProductCard({ p, i, t, hidden }) {
+function ProductCard({ p, i, t, hidden, onAdd }) {
   const [open, setOpen] = useState(false)
   return (
     <article
@@ -137,9 +138,20 @@ function ProductCard({ p, i, t, hidden }) {
             </div>
           </>
         )}
-        <a className="link" href="#contacts">
-          {t.order} <span>→</span>
-        </a>
+        {p.price > 0 ? (
+          <div className="card__buy">
+            <span className="card__price">
+              {p.price} {t.currency}
+            </span>
+            <button type="button" className="card__add" onClick={() => onAdd(p.key)}>
+              {t.addToCart}
+            </button>
+          </div>
+        ) : (
+          <a className="link" href="#contacts">
+            {t.order} <span>→</span>
+          </a>
+        )}
       </div>
     </article>
   )
@@ -152,6 +164,8 @@ export default function App() {
   const [admin, setAdmin] = useState(null)
   const [activeCat, setActiveCat] = useState('all')
   const [content, setContent] = useState(() => readCache() || DEFAULT_CONTENT)
+  const [cart, setCart] = useState(() => readCartCache())
+  const [cartOpen, setCartOpen] = useState(false)
   const t = T[lang]
   useReveal(content, activeCat)
 
@@ -207,6 +221,7 @@ export default function App() {
             name: me.name || other.name,
             alt: other.name,
             text: me.text || other.text,
+            price: Number(p.price) || 0,
             info: hasInfo ? info : null,
           }
         }),
@@ -224,6 +239,39 @@ export default function App() {
   useEffect(() => {
     if (activeCat !== 'all' && !categories.some((c) => c.id === activeCat)) setActiveCat('all')
   }, [categories, activeCat])
+
+  const cartItems = useMemo(
+    () =>
+      Object.entries(cart)
+        .map(([id, qty]) => {
+          const p = products.find((x) => x.key === id)
+          return p ? { ...p, qty } : null
+        })
+        .filter(Boolean),
+    [cart, products],
+  )
+  const cartCount = cartItems.reduce((s, it) => s + it.qty, 0)
+  const cartTotal = cartItems.reduce((s, it) => s + it.price * it.qty, 0)
+
+  useEffect(() => writeCartCache(cart), [cart])
+
+  const addToCart = (id) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }))
+  const setCartQty = (id, qty) =>
+    setCart((c) => {
+      if (qty <= 0) {
+        const next = { ...c }
+        delete next[id]
+        return next
+      }
+      return { ...c, [id]: Math.min(50, qty) }
+    })
+  const removeFromCart = (id) =>
+    setCart((c) => {
+      const next = { ...c }
+      delete next[id]
+      return next
+    })
+  const clearCart = () => setCart({})
 
   const contacts = content.contacts || {}
   const phone = contacts.phone || ''
@@ -250,8 +298,8 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-  }, [open])
+    document.body.style.overflow = open || cartOpen ? 'hidden' : ''
+  }, [open, cartOpen])
 
   return (
     <>
@@ -277,6 +325,7 @@ export default function App() {
             </button>
           </nav>
           <div className="header__right">
+            <CartButton count={cartCount} onClick={() => setCartOpen(true)} />
             <div className={`lang lang--${lang}`} role="group" aria-label="Language">
               <span className="lang__thumb" />
               <button className={lang === 'ru' ? 'on' : ''} onClick={() => setLang('ru')} aria-pressed={lang === 'ru'}>
@@ -386,6 +435,7 @@ export default function App() {
                   i={i}
                   t={t}
                   hidden={activeCat !== 'all' && p.categoryId !== activeCat}
+                  onAdd={addToCart}
                 />
               ))}
             </div>
@@ -489,6 +539,20 @@ export default function App() {
           </p>
         </div>
       </footer>
+
+      {cartOpen && (
+        <CartDrawer
+          items={cartItems}
+          total={cartTotal}
+          currency={t.currency}
+          t={t}
+          onQty={setCartQty}
+          onRemove={removeFromCart}
+          onClear={clearCart}
+          onClose={() => setCartOpen(false)}
+          onOrdered={clearCart}
+        />
+      )}
 
       {admin === 'login' && <LoginModal onClose={() => setAdmin(null)} onSuccess={() => setAdmin('panel')} />}
       {admin === 'panel' && (
