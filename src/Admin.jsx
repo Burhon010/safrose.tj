@@ -636,7 +636,7 @@ export function AdminPanel({ content, onSaved, onClose, onAuthLost }) {
             Выйти
           </button>
           <button type="button" className="ghost" onClick={close}>
-            Закрыть
+            Вернуться на сайт
           </button>
         </div>
       </header>
