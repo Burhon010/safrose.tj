@@ -286,7 +286,10 @@
   margin-bottom: 16px;
 }
 .cat-list {
-  max-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
   overflow-y: auto;
   padding-right: 6px;
   margin-right: -6px;
@@ -302,6 +305,63 @@
 }
 .cat-list::-webkit-scrollbar-track {
   background: transparent;
+}
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.cat-row:hover {
+  background: var(--blush);
+  border-color: var(--rose);
+}
+.cat-row__name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--wine);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cat-row__count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  min-width: 1.5em;
+  text-align: right;
+}
+.cat-row__edit {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  flex-shrink: 0;
+  color: var(--rose-deep);
+}
+.cat-row__edit svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cat-row--edit {
+  flex-wrap: wrap;
+  cursor: default;
+  border-radius: 18px;
+  padding: 12px;
+  gap: 10px;
+}
+.cat-row--edit:hover {
+  background: none;
+  border-color: var(--line);
 }
 .cat-in {
   flex: 1 1 160px;

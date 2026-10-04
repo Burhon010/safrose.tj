@@ -231,9 +231,14 @@ function ProductEditor({ product, categories, onChange, onDone, onAuthLost }) {
 
 function CategoryManager({ draft, setDraft }) {
   const cats = draft.categories || []
+  const [editing, setEditing] = useState(null)
   const setCats = (categories) => setDraft({ ...draft, categories })
   const upd = (i, patch) => setCats(cats.map((c, n) => (n === i ? { ...c, ...patch } : c)))
-  const add = () => setCats([...cats, { id: 'c' + Date.now().toString(36), ru: '', tj: '' }])
+  const add = () => {
+    const id = 'c' + Date.now().toString(36)
+    setCats([...cats, { id, ru: '', tj: '' }])
+    setEditing(id)
+  }
   const remove = (i) => {
     const cat = cats[i]
     if (!window.confirm(`Удалить категорию «${catLabel(cat)}»?`)) return
@@ -242,7 +247,9 @@ function CategoryManager({ draft, setDraft }) {
       categories: cats.filter((_, n) => n !== i),
       products: draft.products.map((p) => (p.categoryId === cat.id ? { ...p, categoryId: '' } : p)),
     })
+    setEditing(null)
   }
+  const count = (id) => draft.products.filter((p) => p.categoryId === id).length
 
   return (
     <div className="cat-section">
@@ -252,18 +259,34 @@ function CategoryManager({ draft, setDraft }) {
         для продукта выбирается при его редактировании.
       </p>
       {cats.length > 0 && (
-        <ul className="plist cat-list">
-          {cats.map((c, i) => (
-            <li key={c.id}>
-              <input className="cat-in" placeholder="Название (RU)" value={c.ru} onChange={(e) => upd(i, { ru: e.target.value })} />
-              <input className="cat-in" placeholder="Название (TJ)" value={c.tj} onChange={(e) => upd(i, { tj: e.target.value })} />
-              <div className="plist__btns">
-                <button type="button" className="danger" onClick={() => remove(i)}>
-                  Удалить
+        <ul className="cat-list">
+          {cats.map((c, i) =>
+            editing === c.id ? (
+              <li key={c.id} className="cat-row cat-row--edit">
+                <input className="cat-in" placeholder="Название (RU)" value={c.ru} onChange={(e) => upd(i, { ru: e.target.value })} autoFocus />
+                <input className="cat-in" placeholder="Название (TJ)" value={c.tj} onChange={(e) => upd(i, { tj: e.target.value })} />
+                <div className="plist__btns">
+                  <button type="button" className="danger" onClick={() => remove(i)}>
+                    Удалить
+                  </button>
+                  <button type="button" className="main" onClick={() => setEditing(null)}>
+                    Готово
+                  </button>
+                </div>
+              </li>
+            ) : (
+              <li key={c.id} className="cat-row" onClick={() => setEditing(c.id)}>
+                <span className="cat-row__name">{catLabel(c)}</span>
+                <span className="cat-row__count">{count(c.id)}</span>
+                <button type="button" className="cat-row__edit" aria-label="Редактировать" onClick={() => setEditing(c.id)}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z" />
+                    <path d="M13.5 6.5l4 4" />
+                  </svg>
                 </button>
-              </div>
-            </li>
-          ))}
+              </li>
+            ),
+          )}
         </ul>
       )}
       <button type="button" className="ghost add" onClick={add}>
