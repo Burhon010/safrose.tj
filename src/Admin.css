@@ -285,6 +285,24 @@
 .cat-section .muted {
   margin-bottom: 16px;
 }
+.cat-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rose) transparent;
+}
+.cat-list::-webkit-scrollbar {
+  width: 6px;
+}
+.cat-list::-webkit-scrollbar-thumb {
+  background: var(--rose);
+  border-radius: 999px;
+}
+.cat-list::-webkit-scrollbar-track {
+  background: transparent;
+}
 .cat-in {
   flex: 1 1 160px;
   min-width: 0;

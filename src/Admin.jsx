@@ -252,7 +252,7 @@ function CategoryManager({ draft, setDraft }) {
         для продукта выбирается при его редактировании.
       </p>
       {cats.length > 0 && (
-        <ul className="plist">
+        <ul className="plist cat-list">
           {cats.map((c, i) => (
             <li key={c.id}>
               <input className="cat-in" placeholder="Название (RU)" value={c.ru} onChange={(e) => upd(i, { ru: e.target.value })} />
