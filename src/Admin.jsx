@@ -6,7 +6,9 @@ import {
   fetchOrders,
   getToken,
   login,
+  resetAllOrders,
   saveContent,
+  setOrderSeen,
   setToken,
   uploadImage,
 } from './api.js'
@@ -429,6 +431,32 @@ function Orders({ onAuthLost }) {
     }
   }
 
+  const resetAll = async () => {
+    if (!window.confirm('Удалить все заказы и начать нумерацию заново с №1? Отменить нельзя.')) return
+    setBusy(true)
+    try {
+      await resetAllOrders()
+      setOrders([])
+    } catch (ex) {
+      if (ex.status === 401) onAuthLost()
+      else setErr('Не удалось сбросить нумерацию')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const toggleSeen = async (o) => {
+    const value = !o.seen
+    setOrders((list) => list.map((x) => (x.id === o.id ? { ...x, seen: value } : x)))
+    try {
+      await setOrderSeen(o.id, value)
+    } catch (ex) {
+      setOrders((list) => list.map((x) => (x.id === o.id ? { ...x, seen: !value } : x)))
+      if (ex.status === 401) onAuthLost()
+      else setErr('Не удалось изменить статус заказа')
+    }
+  }
+
   return (
     <div>
       {!tgOn && orders !== null && (
@@ -444,6 +472,9 @@ function Orders({ onAuthLost }) {
         <button type="button" className="ghost" onClick={clear} disabled={busy || !orders?.length}>
           Очистить всё
         </button>
+        <button type="button" className="ghost" onClick={resetAll} disabled={busy}>
+          Очистить и начать с №1
+        </button>
       </div>
       {err && <p className="err">{err}</p>}
       {orders === null ? (
@@ -453,9 +484,18 @@ function Orders({ onAuthLost }) {
       ) : (
         <ul className="orders">
           {orders.map((o) => (
-            <li key={o.id} className="order">
+            <li key={o.id} className={`order ${o.seen ? 'is-seen' : ''}`}>
               <div className="order__top">
-                <b>{fmtTime(o.time)}</b>
+                <span className={`order__status ${o.seen ? 'is-seen' : 'is-new'}`}>
+                  {o.seen ? 'Заявка принята' : 'Новый заказ'}
+                </span>
+                <b>№{o.no || '—'}</b>
+                <span className="order__date">{fmtTime(o.time)}</span>
+              </div>
+              <div className="order__btns">
+                <button type="button" className="ghost" onClick={() => toggleSeen(o)} disabled={busy}>
+                  {o.seen ? 'Отметить новым' : 'Принять заявку'}
+                </button>
                 <button type="button" className="danger" onClick={() => remove(o.id)} disabled={busy}>
                   Удалить
                 </button>

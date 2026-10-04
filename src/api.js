@@ -82,3 +82,6 @@ export const placeOrder = (payload) => call('/api/order', { method: 'POST', body
 export const fetchOrders = () => call('/api/orders', { auth: true })
 export const deleteOrder = (id) => call('/api/orders', { method: 'POST', body: { action: 'delete', id }, auth: true })
 export const clearOrders = () => call('/api/orders', { method: 'POST', body: { action: 'clear' }, auth: true })
+export const resetAllOrders = () => call('/api/orders', { method: 'POST', body: { action: 'resetAll' }, auth: true })
+export const setOrderSeen = (id, value) =>
+  call('/api/orders', { method: 'POST', body: { action: 'seen', id, value }, auth: true })
